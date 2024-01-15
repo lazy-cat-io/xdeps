@@ -1,0 +1,234 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '.github/workflows/**'
+      - 'src/**'
+      - '.cljstyle'
+      - 'bb.edn'
+      - 'build.clj'
+      - 'deps.edn'
+      - 'tests.edn'
+      - 'version'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - '.github/workflows/**'
+      - 'src/**'
+      - '.cljstyle'
+      - 'bb.edn'
+      - 'build.clj'
+      - 'deps.edn'
+      - 'tests.edn'
+      - 'version'
+
+jobs:
+  test:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    runs-on: ubuntu-latest
+    steps:
+
+      # Git
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+       # Variables
+
+      - name: Setup variables
+        id: xdeps
+        run: |
+          XDEPS_VERSION=$(cat version)
+          echo "version=${XDEPS_VERSION}" >> $GITHUB_OUTPUT
+
+      # Tools
+
+      - name: Setup clojure tools
+        uses: DeLaGuardo/setup-clojure@12.3
+        with:
+          bb: latest
+          cli: latest
+          clj-kondo: latest
+          cljstyle: latest
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.clojure
+            ~/.cpcache
+          key: deps-${{ hashFiles('deps.edn') }}
+          restore-keys: deps-
+
+      # Linters & tests
+
+      - name: Run linters
+        run: bb lint
+
+      - name: Run tests
+        run: bb test
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          path: coverage
+          name: coverage-${{ steps.xdeps.outputs.version }}
+
+      # - name: Publish coverage
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     files: ./coverage/codecov.json
+      #     flags: unit,integration
+      #     os: ${{ matrix.name }}
+      #     fail_ci_if_error: false
+      #     verbose: true
+      #
+
+  uberjar:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+
+      # Git
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+       # Variables
+
+      - name: Setup variables
+        id: xdeps
+        run: |
+          XDEPS_VERSION=$(cat version)
+          echo "version=${XDEPS_VERSION}" >> $GITHUB_OUTPUT
+
+      # Tools
+
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup clojure tools
+        uses: DeLaGuardo/setup-clojure@12.3
+        with:
+          bb: latest
+          cli: latest
+          clj-kondo: latest
+          cljstyle: latest
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.clojure
+            ~/.cpcache
+          key: deps-${{ hashFiles('deps.edn') }}
+          restore-keys: deps-
+
+      # Uberjar
+
+      - name: Build uberjar
+        run: bb build uberjar
+
+      - name: Upload uberjar
+        uses: actions/upload-artifact@v4
+        with:
+          path: target/xdeps.jar
+          name: xdeps-${{ steps.xdeps.outputs.version }}.jar
+
+  native-image:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    needs: uberjar
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+          - os: macos-latest
+            name: macos
+    runs-on: ${{ matrix.os }}
+    steps:
+
+      # Git
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Variables
+
+      - name: Setup variables
+        id: xdeps
+        run: |
+          XDEPS_VERSION=$(cat version)
+          echo "version=${XDEPS_VERSION}" >> $GITHUB_OUTPUT
+
+      # Tools
+
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup clojure tools
+        uses: DeLaGuardo/setup-clojure@12.3
+        with:
+          bb: latest
+          cli: latest
+          clj-kondo: latest
+          cljstyle: latest
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.clojure
+            ~/.cpcache
+          key: ${{ matrix.os}}-deps-${{ hashFiles('deps.edn') }}
+          restore-keys: ${{ matrix.name }}-deps-
+
+      # Native image
+
+      - name: Download uberjar
+        uses: actions/download-artifact@v4
+        with:
+          path: target
+          name: xdeps-${{ steps.xdeps.outputs.version }}.jar
+
+      - name: Build native image
+        run: bb build native-image
+
+      - name: Check artifact
+        run: ./target/xdeps
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: target/xdeps
+          name: xdeps-${{ steps.xdeps.outputs.version }}-${{ matrix.name }}-amd64
