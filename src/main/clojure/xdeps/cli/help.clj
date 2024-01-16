@@ -17,7 +17,7 @@
   (let [{:keys [version branch commit timestamp]} config/meta
         build  (->> [branch commit timestamp]
                     (remove empty?)
-                    (str/join ","))]
+                    (str/join ", "))]
     (println (format "xdeps %s (%s)" version build))))
 
 
