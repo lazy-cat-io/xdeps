@@ -68,8 +68,8 @@ jobs:
             ~/.gitlibs
             ~/.clojure
             ~/.cpcache
-          key: deps-${{ hashFiles('deps.edn') }}
-          restore-keys: deps-
+          key: ubuntu-deps-${{ hashFiles('deps.edn') }}
+          restore-keys: ubuntu-deps-
 
       # Linters & tests
 
@@ -144,8 +144,8 @@ jobs:
             ~/.gitlibs
             ~/.clojure
             ~/.cpcache
-          key: deps-${{ hashFiles('deps.edn') }}
-          restore-keys: deps-
+          key: ubuntu-deps-${{ hashFiles('deps.edn') }}
+          restore-keys: ubuntu-deps-
 
       # Uberjar
 
@@ -166,7 +166,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            name: linux
+            name: ubuntu
           - os: macos-latest
             name: macos
     runs-on: ${{ matrix.os }}
@@ -214,7 +214,7 @@ jobs:
             ~/.gitlibs
             ~/.clojure
             ~/.cpcache
-          key: ${{ matrix.os}}-deps-${{ hashFiles('deps.edn') }}
+          key: ${{ matrix.name }}-deps-${{ hashFiles('deps.edn') }}
           restore-keys: ${{ matrix.name }}-deps-
 
       # Native image
@@ -246,7 +246,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            name: linux
+            name: ubuntu
     runs-on: ${{ matrix.os }}
     steps:
 
@@ -277,7 +277,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install native dev tools
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.name == 'ubuntu'
         run: |
           sudo apt-get update
           sudo apt-get -y install build-essential zlib1g-dev
@@ -300,7 +300,7 @@ jobs:
             ~/.gitlibs
             ~/.clojure
             ~/.cpcache
-          key: ${{ matrix.os}}-deps-${{ hashFiles('deps.edn') }}
+          key: ${{ matrix.name }}-deps-${{ hashFiles('deps.edn') }}
           restore-keys: ${{ matrix.name }}-deps-
 
       # Native image
