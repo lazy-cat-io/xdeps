@@ -158,6 +158,7 @@ jobs:
           path: target/xdeps.jar
           name: xdeps-${{ steps.xdeps.outputs.version }}.jar
 
+
   native-image:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     needs: uberjar
@@ -236,3 +237,89 @@ jobs:
         with:
           path: target/xdeps
           name: xdeps-${{ steps.xdeps.outputs.version }}-${{ matrix.name }}-amd64
+
+
+  native-image-static:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    needs: uberjar
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+    runs-on: ${{ matrix.os }}
+    steps:
+
+      # Git
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Variables
+
+      - name: Setup variables
+        id: xdeps
+        run: |
+          XDEPS_VERSION=$(cat version)
+          echo "version=${XDEPS_VERSION}" >> $GITHUB_OUTPUT
+
+      # Tools
+
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+          native-image-musl: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install native dev tools
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential zlib1g-dev
+          sudo apt-get -y install musl
+
+      - name: Setup clojure tools
+        uses: DeLaGuardo/setup-clojure@12.3
+        with:
+          bb: latest
+          cli: latest
+          clj-kondo: latest
+          cljstyle: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.clojure
+            ~/.cpcache
+          key: ${{ matrix.os}}-deps-${{ hashFiles('deps.edn') }}
+          restore-keys: ${{ matrix.name }}-deps-
+
+      # Native image
+
+      - name: Download uberjar
+        uses: actions/download-artifact@v4
+        with:
+          path: target
+          name: xdeps-${{ steps.xdeps.outputs.version }}.jar
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build native image
+        run: bb build native-image static
+
+      - name: Check artifact
+        run: ./target/xdeps
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: target/xdeps
+          name: xdeps-${{ steps.xdeps.outputs.version }}-${{ matrix.name }}-static-amd64
