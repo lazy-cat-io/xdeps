@@ -58,6 +58,7 @@ jobs:
           cli: latest
           clj-kondo: latest
           cljstyle: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
         uses: actions/cache@v3
@@ -133,6 +134,7 @@ jobs:
           cli: latest
           clj-kondo: latest
           cljstyle: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
         uses: actions/cache@v3
@@ -201,6 +203,7 @@ jobs:
           cli: latest
           clj-kondo: latest
           cljstyle: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
         uses: actions/cache@v3
@@ -220,6 +223,7 @@ jobs:
         with:
           path: target
           name: xdeps-${{ steps.xdeps.outputs.version }}.jar
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build native image
         run: bb build native-image
