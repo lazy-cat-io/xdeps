@@ -85,16 +85,16 @@ jobs:
           path: coverage
           name: coverage-${{ steps.xdeps.outputs.version }}
 
-      # - name: Publish coverage
-      #   uses: codecov/codecov-action@v3
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     files: ./coverage/codecov.json
-      #     flags: unit,integration
-      #     os: ${{ matrix.name }}
-      #     fail_ci_if_error: false
-      #     verbose: true
-      #
+      - name: Publish coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/codecov.json
+          flags: unit,integration
+          os: ubuntu
+          fail_ci_if_error: false
+          verbose: true
+
 
   uberjar:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
