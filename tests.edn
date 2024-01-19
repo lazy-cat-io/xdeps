@@ -1,41 +1,33 @@
 #kaocha/v1
- {:kaocha/fail-fast?                  false
-  :kaocha/color?                      true
-  :kaocha/reporter                    [kaocha.report/documentation]
-
+ {:capture-output? true
   :kaocha.plugin.randomize/randomize? true
+  :kaocha/color? true
+  :kaocha/fail-fast? false
+  :kaocha/reporter [kaocha.report/documentation]
 
-  :capture-output?                    true
+  :plugins [:kaocha.plugin.alpha/info
+            :kaocha.plugin/capture-output
+            :kaocha.plugin/cloverage
+            :kaocha.plugin/filter
+            :kaocha.plugin/hooks
+            :kaocha.plugin/print-invocations
+            :kaocha.plugin/randomize]
 
-  :plugins                            [:kaocha.plugin/capture-output
-                                       :kaocha.plugin/cloverage
-                                       :kaocha.plugin/filter
-                                       :kaocha.plugin/hooks
-                                       :kaocha.plugin/notifier
-                                       :kaocha.plugin/print-invocations
-                                       :kaocha.plugin/randomize
-                                       :kaocha.plugin.alpha/info]
+  :tests [{:id :unit
+           :focus-meta [:unit]
+           :source-paths ["src/main/clojure"]
+           :test-paths ["src/test/clojure"]}
+          {:id :integration
+           :focus-meta [:integration]
+           :source-paths ["src/main/clojure"]
+           :test-paths ["src/test/clojure"]}]
 
-  :tests                              [{:id           :unit
-                                        :source-paths ["src/main/clojure"]
-                                        :test-paths   ["src/test/clojure"]
-                                        :focus-meta   [:unit]}
-                                       {:id           :integration
-                                        :source-paths ["src/main/clojure"]
-                                        :test-paths   ["src/test/clojure"]
-                                        :focus-meta   [:integration]}]
-
-  :cloverage/opts                     {:output           "coverage"
-                                       :ns-regex         []
-                                       :ns-exclude-regex []
-                                       :fail-threshold   0
-                                       :low-watermark    50
-                                       :high-watermark   80
-                                       :summary?         true
-                                       :text?            false
-                                       :emma-xml?        false
-                                       :html?            true
-                                       :nop?             false
-                                       :lcov?            false
-                                       :coveralls?       false
-                                       :codecov?         true}}
+  :cloverage/opts {:output "coverage"
+                   :ns-regex []
+                   :ns-exclude-regex []
+                   :fail-threshold 0
+                   :low-watermark 50
+                   :high-watermark 80
+                   :summary? true
+                   :html? true
+                   :codecov? true}}
