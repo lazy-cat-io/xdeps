@@ -78,7 +78,7 @@
   repl {:doc "Run nREPL"
         :depends [clean -build:meta]
         :override-builtin true
-        :task (shell "clj -M:bench:test:develop --main nrepl.cmdline --interactive")}
+        :task (shell "clj -M:bench:test:develop --main nrepl.cmdline --middleware '[\"cider.nrepl/cider-middleware\"]' --interactive")}
 
   clean {:doc "Run cleanup"
          :task (doseq [dir ["target" "coverage"]]

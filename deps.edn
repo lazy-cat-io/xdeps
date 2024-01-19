@@ -12,7 +12,8 @@
 
            :develop {:extra-paths ["src/develop/clojure" "src/develop/resources"]
                      :extra-deps {hashp/hashp {:mvn/version "0.2.2"}
-                                  nrepl/nrepl {:mvn/version "1.1.0"}}}
+                                  nrepl/nrepl {:mvn/version "1.1.0"}
+                                  cider/cider-nrepl {:mvn/version "0.45.0"}}}
 
            :test {:extra-paths ["src/test/clojure" "src/test/resources"]
                   :extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}
