@@ -1,11 +1,9 @@
- (ns xdeps.main
-   (:gen-class)
-   (:require
-     [xdeps.cli :as cli]))
-
+(ns xdeps.main
+  (:gen-class)
+  (:require
+   [xdeps.cli :as cli]))
 
 (set! *warn-on-reflection* true)
-
 
 (defn -main
   "Application entrypoint."
