@@ -58,7 +58,6 @@ jobs:
           cli: latest
           clj-kondo: latest
           cljstyle: latest
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup clojure-lsp
         uses: clojure-lsp/setup-clojure-lsp@v1
@@ -130,14 +129,12 @@ jobs:
           version: 'latest'
           java-version: '17'
           components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup clojure tools
         uses: DeLaGuardo/setup-clojure@12.3
         with:
           bb: latest
           cli: latest
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
         uses: actions/cache@v4
@@ -198,14 +195,12 @@ jobs:
           version: 'latest'
           java-version: '17'
           components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup clojure tools
         uses: DeLaGuardo/setup-clojure@12.3
         with:
           bb: latest
           cli: latest
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
         uses: actions/cache@v4
@@ -275,7 +270,6 @@ jobs:
           java-version: '17'
           components: 'native-image'
           native-image-musl: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install native dev tools
         if: matrix.name == 'ubuntu'
@@ -289,7 +283,6 @@ jobs:
         with:
           bb: latest
           cli: latest
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
         uses: actions/cache@v4
