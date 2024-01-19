@@ -68,10 +68,12 @@
 
   lint {:doc "Run linters"
         :task (case (first *command-line-args*)
-                "fix" (shell "cljstyle fix src")
+                "fix" (do
+                        (shell "clojure-lsp format")
+                        (shell "clojure-lsp clean-ns"))
                 (do
-                  (shell "cljstyle check src")
-                  (shell "clj-kondo --lint src")))}
+                  (shell "clojure-lsp format --dry")
+                  (shell "clojure-lsp diagnostics")))}
 
   repl {:doc "Run nREPL"
         :depends [clean -build:meta]

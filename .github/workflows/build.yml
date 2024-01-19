@@ -60,6 +60,11 @@ jobs:
           cljstyle: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup clojure-lsp
+        uses: clojure-lsp/setup-clojure-lsp@v1
+        with:
+          clojure-lsp-version: 2023.12.29-12.09.27
+
       - name: Cache deps
         uses: actions/cache@v4
         with:
@@ -132,8 +137,6 @@ jobs:
         with:
           bb: latest
           cli: latest
-          clj-kondo: latest
-          cljstyle: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
@@ -202,8 +205,6 @@ jobs:
         with:
           bb: latest
           cli: latest
-          clj-kondo: latest
-          cljstyle: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
@@ -288,8 +289,6 @@ jobs:
         with:
           bb: latest
           cli: latest
-          clj-kondo: latest
-          cljstyle: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache deps
